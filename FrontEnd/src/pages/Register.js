@@ -1,4 +1,4 @@
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { Image, KeyboardAvoidingView, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { TextInput } from 'react-native-paper';
 import nailIcon from '../assets/nail.png';
 import { useState } from "react";
@@ -10,12 +10,16 @@ const Register = ({ navigation }) => {
     const [confirmPassword, setConfirmPassword] = useState('');
 
     return (
-        <View style={styles.container}>
+        <KeyboardAvoidingView
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            style={styles.container}
+        >
 
-            <Image
-                source={nailIcon}
-                style={styles.logo}
-            />
+            <View style={styles.header}>
+                <Image source={nailIcon} style={styles.logo} />
+                <Text style={styles.title}>Bem-vinda!</Text>
+                <Text style={styles.subtitle}>Crie sua conta e organize seus atendimentos.</Text>
+            </View>
 
             <TouchableOpacity style={styles.inputContainer}>
                 <TextInput
@@ -24,9 +28,11 @@ const Register = ({ navigation }) => {
                     value={user}
                     onChangeText={text => setUser(text)}
                     style={styles.input}
-                    textColor="#d66fb9"
+                    textColor="#fff"
                     underlineColor="transparent"
-                    theme={{ colors: { primary: '#d66fb9', placeholder: '#d66fb9' } }}
+                    activeUnderlineColor="#D4AF37"
+                    theme={{ colors: { primary: '#D4AF37', onSurfaceVariant: '#D4AF37' } }}
+                    left={<TextInput.Icon icon="account-outline" color="#D4AF37" />}
                 />
             </TouchableOpacity>
 
@@ -37,9 +43,11 @@ const Register = ({ navigation }) => {
                     value={email}
                     onChangeText={text => setEmail(text)}
                     style={styles.input}
-                    textColor="#d66fb9"
+                    textColor="#fff"
                     underlineColor="transparent"
-                    theme={{ colors: { primary: '#d66fb9', placeholder: '#d66fb9' } }}
+                    activeUnderlineColor="#D4AF37"
+                    theme={{ colors: { primary: '#D4AF37', onSurfaceVariant: '#D4AF37' } }}
+                    left={<TextInput.Icon icon="account-outline" color="#D4AF37" />}
                 />
             </TouchableOpacity>
 
@@ -50,9 +58,11 @@ const Register = ({ navigation }) => {
                     value={password}
                     onChangeText={text => setPassword(text)}
                     style={styles.input}
-                    textColor="#d66fb9"
+                    textColor="#fff"
                     underlineColor="transparent"
-                    theme={{ colors: { primary: '#d66fb9', placeholder: '#d66fb9' } }}
+                    activeUnderlineColor="#D4AF37"
+                    theme={{ colors: { primary: '#D4AF37', onSurfaceVariant: '#D4AF37' } }}
+                    left={<TextInput.Icon icon="lock-outline" color="#D4AF37" />}
                     secureTextEntry
                 />
             </TouchableOpacity>
@@ -64,9 +74,11 @@ const Register = ({ navigation }) => {
                     value={confirmPassword}
                     onChangeText={text => setConfirmPassword(text)}
                     style={styles.input}
-                    textColor="#d66fb9"
+                    textColor="#fff"
                     underlineColor="transparent"
-                    theme={{ colors: { primary: '#d66fb9', placeholder: '#d66fb9' } }}
+                    activeUnderlineColor="#D4AF37"
+                    theme={{ colors: { primary: '#D4AF37', onSurfaceVariant: '#D4AF37' } }}
+                    left={<TextInput.Icon icon="account-outline" color="#D4AF37" />}
                     secureTextEntry
                 />
             </TouchableOpacity>
@@ -84,7 +96,7 @@ const Register = ({ navigation }) => {
                 </TouchableOpacity>
             </View>
 
-        </View>
+        </KeyboardAvoidingView>
     )
 }
 
@@ -93,40 +105,64 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#f98ae3',
+        backgroundColor: '#1A1A1A',
+        paddingHorizontal: 20,
+    },
+    header: {
+        alignItems: 'center',
+        marginBottom: 40,
     },
     logo: {
-        width: 200,
-        height: 150,
-        tintColor: '#fff',
-        marginBottom: 50,
+        width: 120,
+        height: 120,
+        tintColor: '#D4AF37',
         resizeMode: 'contain',
     },
+    title: {
+        fontSize: 28,
+        fontWeight: 'bold',
+        color: '#D4AF37',
+        marginTop: 10,
+    },
+    subtitle: {
+        color: '#fff',
+        opacity: 0.6,
+        fontSize: 14,
+    },
     inputContainer: {
-        flexDirection: 'row',
-        marginBottom: 25,
+        width: '100%',
+        alignItems: 'center',
     },
     input: {
-        fontSize: 16,
-        backgroundColor: '#fff5fd',
-        width: '70%',
-        height: 45,
-        borderRadius: 24,
-        borderTopLeftRadius: 24,
-        borderTopRightRadius: 24,
-        textAlign: 'center'
+        width: '90%',
+        height: 55,
+        backgroundColor: '#252525',
+        borderTopLeftRadius: 12,
+        borderTopRightRadius: 12,
+        borderRadius: 12,
+        marginBottom: 15,
+        borderWidth: 1,
+        borderColor: '#333',
     },
     confirmContainer: {
-        width: '35%',
-        height: 45,
-        backgroundColor: '#fff',
-        borderRadius: 24,
+        width: '90%',
+        height: 55,
+        backgroundColor: '#D4AF37',
+        borderRadius: 12,
         justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: 10,
+        shadowColor: '#D4AF37',
+        shadowOffset: { width: 0, height: 4 },
+        shadowOpacity: 0.3,
+        shadowRadius: 5,
+        elevation: 8,
+        marginTop: 10,
+        marginBottom: 20,
     },
     confirm: {
-        fontSize: 16,
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#252525',
     },
     loginContainer: {
         flexDirection: 'row',
@@ -136,8 +172,12 @@ const styles = StyleSheet.create({
         opacity: 0.8,
     },
     loginButton: {
-        color: '#000',
-        opacity: 0.8,
+        color: '#D4AF37',
+        fontWeight: 'bold',
+        borderBottomWidth: 1,
+        borderBottomColor: '#D4AF37',
+        paddingBottom: 1,
+        alignSelf: 'flex-start',
     }
 });
 

@@ -10,10 +10,11 @@ const Login = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <Image
-        source={nailIcon}
-        style={styles.logo}
-      />
+      <View style={styles.header}>
+        <Image source={nailIcon} style={styles.logo} />
+        <Text style={styles.title}>Bem-vinda!</Text>
+        <Text style={styles.subtitle}>Gerencie seus horários e clientes</Text>
+      </View>
 
       <View style={styles.inputContainer}>
         <TextInput
@@ -22,9 +23,11 @@ const Login = ({ navigation }) => {
           value={user}
           onChangeText={text => setUser(text)}
           style={styles.input}
-          textColor="#b3559a"
+          textColor="#fff"
           underlineColor="transparent"
-          theme={{ colors: { primary: '#b3559a', placeholder: '#b3559a' } }}
+          activeUnderlineColor="#D4AF37"
+          theme={{ colors: { primary: '#D4AF37', onSurfaceVariant: '#D4AF37' } }}
+          left={<TextInput.Icon icon="account-outline" color="#D4AF37" />}
         />
       </View>
 
@@ -36,17 +39,18 @@ const Login = ({ navigation }) => {
           onChangeText={text => setPassword(text)}
           secureTextEntry
           style={styles.input}
-          textColor="#b3559a"
+          textColor="#fff"
           underlineColor="transparent"
-          theme={{ colors: { primary: '#b3559a', placeholder: '#b3559a' } }}
+          theme={{ colors: { primary: '#D4AF37', onSurfaceVariant: '#D4AF37' } }}
+          left={<TextInput.Icon icon="lock-outline" color="#D4AF37" />}
         />
       </View>
 
-      <TouchableOpacity style={styles.forgotContainer}>
+      <TouchableOpacity style={styles.forgotContainer} onPress={() => navigation.navigate('ForgotPassword')}>
         <Text style={styles.forgot}>Esqueci minha senha</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.buttonContainer}>
+      <TouchableOpacity style={styles.buttonContainer} onPress={() => navigation.navigate('Home')}>
         <Text style={styles.button}>
           Entrarㅤ
           <FontAwesome6 name="arrow-right" style={styles.arrow} />
@@ -68,65 +72,92 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
-    backgroundColor: '#f98ae3',
+    backgroundColor: '#1A1A1A',
     alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 40,
   },
   logo: {
-    width: 200,
-    height: 150,
-    marginBottom: 50,
+    width: 120,
+    height: 120,
     resizeMode: 'contain',
-    tintColor: '#fff',
+    tintColor: '#D4AF37',
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#D4AF37',
+    marginTop: 10,
+  },
+  subtitle: {
+    color: '#fff',
+    opacity: 0.6,
+    fontSize: 14,
   },
   inputContainer: {
-    flexDirection: 'row',
-    marginBottom: 25,
+    width: '100%',
+    alignItems: 'center',
   },
   input: {
-    width: '70%',
-    height: 50,
-    backgroundColor: '#fff5fd',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    borderRadius: 24,
-    textAlign: 'center'
+    width: '90%',
+    height: 55,
+    backgroundColor: '#252525',
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+    borderRadius: 12,
+    marginBottom: 15,
+    borderWidth: 1,
+    borderColor: '#333',
   },
   forgotContainer: {
-    width: '70%',
+    width: '90%',
     alignItems: 'flex-end',
-    marginBottom: 50,
-    marginTop: -15,
+    marginBottom: 30,
   },
   forgot: {
-    fontSize: 16,
-    color: '#fff',
+    fontSize: 14,
+    color: '#D4AF37',
     opacity: 0.8,
   },
   buttonContainer: {
-    width: '70%',
-    height: 45,
-    backgroundColor: '#fff',
-    borderRadius: 24,
+    width: '90%',
+    height: 55,
+    backgroundColor: '#D4AF37',
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 15,
+    shadowColor: '#D4AF37',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 5,
+    elevation: 8,
   },
   button: {
-    fontSize: 16,
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#252525',
   },
   arrow: {
     fontSize: 16,
   },
   registerContainer: {
     flexDirection: 'row',
+    marginTop: 20,
   },
   registerQuestion: {
     color: '#fff',
     opacity: 0.8,
   },
   register: {
-    color: '#000',
-    opacity: 0.8,
+    color: '#D4AF37',
+    fontWeight: 'bold',
+    borderBottomWidth: 1,
+    borderBottomColor: '#D4AF37',
+    paddingBottom: 1,
+    alignSelf: 'flex-start',
   }
 });
 
