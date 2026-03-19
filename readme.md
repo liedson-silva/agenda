@@ -7,9 +7,10 @@ Esta interface foi projetada para oferecer agilidade e controle total sobre a ro
 ## 🛠️ Tecnologias
 
 - Node.js
+- JWT 
 - React.native
 - MongoDB
 
 ## Imagem do projeto
    
-![Screenshot do site](./frontEnd/src/assets/imagemApp.png)
+![Screenshot do site](./FrontEnd/src/assets/imagemApp.jpeg)

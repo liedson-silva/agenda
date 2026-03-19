@@ -1,7 +1,11 @@
 import { View, Text, StyleSheet, TouchableOpacity, Platform, SafeAreaView, StatusBar } from 'react-native'
 import { FontAwesome6 } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import AxiosToastError from '../utils/AxiosToastError';
+import SummaryApi from '../common/SummaryApi';
+import Axios from '../utils/Axios';
 
 const Home = ({ navigation }) => {
     const [itemActive, setItemActive] = useState('HOJE');
@@ -9,6 +13,10 @@ const Home = ({ navigation }) => {
     const [date, setDate] = useState(new Date());
     const [showCalendar, setShowCalendar] = useState(false);
     const [showDate, setShowDate] = useState(true);
+    const [userName, setUserName] = useState('');
+    const [appointments, setAppointments] = useState([]);
+    const [totalEarnings, setTotalEarnings] = useState(0);
+    const [loading, setLoading] = useState(false);
 
     const onChange = (event, selectedDate) => {
         setShowCalendar(false);
@@ -17,6 +25,59 @@ const Home = ({ navigation }) => {
         }
     };
 
+    useEffect(() => {
+        const getUserData = async () => {
+            try {
+                const name = await AsyncStorage.getItem('savedUser');
+                if (name) {
+                    setUserName(name);
+                }
+            } catch (error) {
+                console.log("Erro ao carregar nome:", error);
+            }
+        };
+        getUserData();
+    }, []);
+
+    const handleLogout = async () => {
+        try {
+            await AsyncStorage.multiRemove(['token', 'savedUser']);
+
+            navigation.replace('Login');
+        } catch (e) {
+            console.log("Erro ao sair:", e);
+        }
+    };
+
+    const fetchAppointments = async () => {
+        setLoading(true);
+        try {
+            const token = await AsyncStorage.getItem('token');
+            const response = await Axios({
+                ...SummaryApi.getAppointments,
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            if (response.data.success) {
+                const data = response.data.data || [];
+                setAppointments(data);
+
+                const total = data.reduce((acc, curr) => {
+                    return acc + (Number(curr.hand) || 0) + (Number(curr.foot) || 0);
+                }, 0);
+                setTotalEarnings(total);
+            }
+        } catch (error) {
+            AxiosToastError(error);
+        }
+    }
+
+    useEffect(() => {
+        fetchAppointments();
+    }, [itemActive, date]);
+
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="light-content" />
@@ -24,8 +85,8 @@ const Home = ({ navigation }) => {
             <View style={styles.subContainer}>
 
                 <View style={styles.header}>
-                    <Text style={styles.name}>Olá, Jéssica!</Text>
-                    <TouchableOpacity style={styles.exitButton} onPress={() => navigation.navigate('Login')}>
+                    <Text style={styles.name}>Olá, {userName}!</Text>
+                    <TouchableOpacity style={styles.exitButton} onPress={handleLogout}>
                         <Text style={styles.exitButtonText}>Sair</Text>
                     </TouchableOpacity>
                 </View>
@@ -65,7 +126,7 @@ const Home = ({ navigation }) => {
                 <View style={styles.statsContainer}>
                     <View style={styles.statsRow}>
                         <Text style={styles.statsLabel}>GANHOS {period}:</Text>
-                        <Text style={styles.statsValue}>R$ 0,00</Text>
+                        <Text style={styles.statsValue}>R$ {totalEarnings.toFixed(2)}</Text>
                     </View>
 
                     {showDate && (

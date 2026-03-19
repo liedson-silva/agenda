@@ -1,15 +1,63 @@
-import { useState } from 'react';
-import { Text, View, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import { useEffect, useState } from 'react';
+import { Text, View, StyleSheet, TouchableOpacity, Image, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import nailIcon from '../assets/nail.png';
 import { FontAwesome6 } from '@expo/vector-icons';
 import { TextInput } from 'react-native-paper';
+import Axios from '../utils/Axios.js';
+import SummaryApi from '../common/SummaryApi.js';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import AxiosToastError from '../utils/AxiosToastError.js';
 
 const Login = ({ navigation }) => {
   const [user, setUser] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async () => {
+    if (!user || !password) {
+      Alert.alert("Erro", "Preencha todos os campos!");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await Axios({
+        ...SummaryApi.login,
+        data: { name: user, password }
+      });
+
+      if (response.data.success) {
+        await AsyncStorage.setItem('token', response.data.token);
+        await AsyncStorage.setItem('savedUser', response.data.data.name);
+        await AsyncStorage.setItem('lastTypedUser', user);
+        navigation.navigate('Home');
+      }
+    } catch (error) {
+      AxiosToastError(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const checkLogin = async () => {
+      const token = await AsyncStorage.getItem('token');
+      if (token) {
+        navigation.replace('Home');
+      }
+      const lastUser = await AsyncStorage.getItem('lastTypedUser');
+      if (lastUser) {
+        setUser(lastUser);
+      }
+    };
+    checkLogin();
+  }, []);
 
   return (
-    <View style={styles.container}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+    >
       <View style={styles.header}>
         <Image source={nailIcon} style={styles.logo} />
         <Text style={styles.title}>Bem-vinda!</Text>
@@ -24,7 +72,6 @@ const Login = ({ navigation }) => {
           onChangeText={text => setUser(text)}
           style={styles.input}
           textColor="#fff"
-          underlineColor="transparent"
           activeUnderlineColor="#D4AF37"
           theme={{ colors: { primary: '#D4AF37', onSurfaceVariant: '#D4AF37' } }}
           left={<TextInput.Icon icon="account-outline" color="#D4AF37" />}
@@ -40,20 +87,19 @@ const Login = ({ navigation }) => {
           secureTextEntry
           style={styles.input}
           textColor="#fff"
-          underlineColor="transparent"
           theme={{ colors: { primary: '#D4AF37', onSurfaceVariant: '#D4AF37' } }}
           left={<TextInput.Icon icon="lock-outline" color="#D4AF37" />}
         />
       </View>
 
-      <TouchableOpacity style={styles.forgotContainer} onPress={() => navigation.navigate('ForgotPassword')}>
-        <Text style={styles.forgot}>Esqueci minha senha</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity style={styles.buttonContainer} onPress={() => navigation.navigate('Home')}>
+      <TouchableOpacity
+        style={[styles.buttonContainer, loading && { opacity: 0.7 }]}
+        onPress={handleLogin}
+        disabled={loading}
+      >
         <Text style={styles.button}>
-          Entrarㅤ
-          <FontAwesome6 name="arrow-right" style={styles.arrow} />
+          {loading ? 'Carregando...' : 'Entrar '}
+          {!loading && <FontAwesome6 name="arrow-right" style={styles.arrow} />}
         </Text>
       </TouchableOpacity>
 
@@ -64,7 +110,7 @@ const Login = ({ navigation }) => {
         </TouchableOpacity>
       </View>
 
-    </View>
+    </KeyboardAvoidingView>
   );
 };
 
@@ -107,20 +153,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#252525',
     borderTopLeftRadius: 12,
     borderTopRightRadius: 12,
-    borderRadius: 12,
     marginBottom: 15,
     borderWidth: 1,
     borderColor: '#333',
-  },
-  forgotContainer: {
-    width: '90%',
-    alignItems: 'flex-end',
-    marginBottom: 30,
-  },
-  forgot: {
-    fontSize: 14,
-    color: '#D4AF37',
-    opacity: 0.8,
   },
   buttonContainer: {
     width: '90%',
@@ -134,6 +169,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 5,
     elevation: 8,
+    marginTop: 10,
   },
   button: {
     fontSize: 18,

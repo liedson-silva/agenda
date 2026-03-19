@@ -1,20 +1,24 @@
-import { Text, View, StyleSheet, Image, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native'
-import { Checkbox, TextInput } from 'react-native-paper';
-import { useState } from 'react';
+import { Text, View, StyleSheet, KeyboardAvoidingView, Platform, TouchableOpacity, TouchableWithoutFeedback, Keyboard, Alert } from 'react-native'
+import { TextInput } from 'react-native-paper';
+import { useEffect, useState } from 'react';
 import { FontAwesome6 } from '@expo/vector-icons';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import Axios from '../utils/Axios.js';
+import SummaryApi from '../common/SummaryApi.js';
+import AxiosToastError from '../utils/AxiosToastError.js';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const NewAppointment = ({ navigation }) => {
     const [time, setTime] = useState('');
     const [client, setClient] = useState('');
     const [details, setDetails] = useState('');
-    const [checkedHand, setCheckedHand] = useState(false);
-    const [checkedFoot, setCheckedFoot] = useState(false);
     const [priceHand, setPriceHand] = useState('');
     const [priceFoot, setPriceFoot] = useState('');
     const [date, setDate] = useState(new Date());
     const [showCalendar, setShowCalendar] = useState(false);
     const [showTimePicker, setShowTimePicker] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [userName, setUserName] = useState('');
 
     const onChange = (event, selectedDate) => {
         setShowCalendar(false);
@@ -33,150 +37,180 @@ const NewAppointment = ({ navigation }) => {
         }
     };
 
+    useEffect(() => {
+        const getUserName = async () => {
+            try {
+                const savedName = await AsyncStorage.getItem('savedUser');
+                if (savedName) {
+                    setUserName(savedName.charAt(0).toUpperCase() + savedName.slice(1));
+                }
+            } catch (error) {
+                console.log("Erro ao carregar nome:", error);
+            }
+        };
+        getUserName();
+    }, []);
+
+    const handleSubmit = async () => {
+        setLoading(true)
+        try {
+            const token = await AsyncStorage.getItem('token');
+            const response = await Axios({
+                ...SummaryApi.createAppointment,
+                headers: {
+                Authorization: `Bearer ${token}` 
+            },
+            data: {
+                date: date.toISOString(),
+                hour: time,
+                client: client,
+                details: details,
+                hand: parseFloat(priceHand),
+                foot: parseFloat(priceFoot),
+            }
+            });
+
+            if (response.data.success) {
+                Alert.alert("Sucesso", response.data.message);
+                navigation.navigate('Home');
+            }
+        } catch (error) {
+            AxiosToastError(error);
+        } finally {
+            setLoading(false);
+        }
+    }
+
     return (
-        <KeyboardAvoidingView
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-            style={styles.container}
-        >
+        <TouchableWithoutFeedback onPress={() => { Keyboard.dismiss(); setShowCalendar(false); setShowTimePicker(false) }} accessible={false}>
+            <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                style={styles.container}
+            >
 
-            <View style={styles.backContainer}>
-                <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate('Home')}>
-                    <FontAwesome6 name="arrow-left" style={styles.arrow} />
-                    <Text style={styles.backText}>
-                        ㅤVoltar
-                    </Text>
-                </TouchableOpacity>
-            </View>
-
-            <View style={styles.header}>
-                <Text style={styles.title}>Olá, Jéssica</Text>
-                <Text style={styles.subtitle}>Agende um novo horário para sua cliente</Text>
-            </View>
-
-            <View style={styles.inputContainer}>
-                <TextInput
-                    value={date.toLocaleDateString()}
-                    onFocus={() => setShowCalendar(true)}
-                    label="Data"
-                    showSoftInputOnFocus={false}
-                    mode="flat"
-                    style={styles.input}
-                    textColor="#fff"
-                    underlineColor="transparent"
-                    theme={{ colors: { primary: '#D4AF37', onSurfaceVariant: '#D4AF37' } }}
-                    right={<TextInput.Icon icon="calendar" iconColor="#D4AF37" />}
-                />
-                <TextInput
-                    label='Horário'
-                    mode='flat'
-                    value={time}
-                    showSoftInputOnFocus={false}
-                    onPressIn={() => setShowTimePicker(true)}
-                    style={styles.input}
-                    textColor="#fff"
-                    underlineColor="transparent"
-                    theme={{ colors: { primary: '#D4AF37', onSurfaceVariant: '#D4AF37' } }}
-                    right={<TextInput.Icon icon="clock" iconColor="#D4AF37"/>}
-                />
-            </View>
-
-            <View style={styles.formContainer}>
-                <TextInput
-                    label='Cliente'
-                    mode='flat'
-                    value={client}
-                    onChangeText={text => setClient(text)}
-                    style={styles.input}
-                    textColor="#fff"
-                    underlineColor="transparent"
-                    theme={{ colors: { primary: '#D4AF37', onSurfaceVariant: '#D4AF37' } }}
-                />
-
-                <TextInput
-                    label='Detalhes'
-                    mode='flat'
-                    value={details}
-                    onChangeText={text => setDetails(text)}
-                    style={styles.input}
-                    textColor="#fff"
-                    underlineColor="transparent"
-                    theme={{ colors: { primary: '#D4AF37', onSurfaceVariant: '#D4AF37' } }}
-                />
-
-                <View style={styles.checkboxContainer}>
-                    <View style={styles.checkbox}>
-                        <Checkbox.Item
-                            status={checkedHand ? 'checked' : 'unchecked'}
-                            onPress={() => setCheckedHand(!checkedHand)}
-                            color="#D4AF37"
-                            uncheckedColor="#555"
-                            labelStyle={styles.label}
-                            mode="android"
-                        />
-                        <Text style={styles.checkboxText}>Mãos</Text>
-                        <TextInput
-                            label='R$'
-                            value={priceHand}
-                            onChangeText={text => setPriceHand(text)}
-                            style={styles.inputPrice}
-                            keyboardType="numeric"
-                            textColor="#fff"
-                            underlineColor="transparent"
-                            theme={{ colors: { primary: '#D4AF37', onSurfaceVariant: '#D4AF37' } }}
-                        />
-                    </View>
-
-                    <View style={styles.checkbox}>
-                        <Checkbox.Item
-                            status={checkedFoot ? 'checked' : 'unchecked'}
-                            onPress={() => setCheckedFoot(!checkedFoot)}
-                            color="#D4AF37"
-                            uncheckedColor="#555"
-                            labelStyle={styles.label}
-                            mode="android"
-                        />
-                        <Text style={styles.checkboxText}>Pés</Text>
-                        <TextInput
-                            label='R$'
-                            value={priceFoot}
-                            onChangeText={text => setPriceFoot(text)}
-                            style={styles.inputPrice}
-                            keyboardType="numeric"
-                            textColor="#fff"
-                            underlineColor="transparent"
-                            theme={{ colors: { primary: '#D4AF37', onSurfaceVariant: '#D4AF37' } }}
-                        />
-                    </View>
+                <View style={styles.backContainer}>
+                    <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate('Home')}>
+                        <FontAwesome6 name="arrow-left" style={styles.arrow} />
+                        <Text style={styles.backText}>
+                            ㅤVoltar
+                        </Text>
+                    </TouchableOpacity>
                 </View>
 
-            </View>
+                <View style={styles.header}>
+                    <Text style={styles.title}>Olá, {userName}</Text>
+                    <Text style={styles.subtitle}>Agende um novo horário para sua cliente</Text>
+                </View>
 
-            <TouchableOpacity style={styles.buttonContainer}>
-                <Text style={styles.button}>
-                    Salvar
-                </Text>
-            </TouchableOpacity>
+                <View style={styles.inputContainer}>
+                    <TextInput
+                        value={date.toLocaleDateString()}
+                        onFocus={() => setShowCalendar(true)}
+                        label="Data"
+                        showSoftInputOnFocus={false}
+                        mode="flat"
+                        style={styles.input}
+                        textColor="#fff"
+                        theme={{ colors: { primary: '#D4AF37', onSurfaceVariant: '#D4AF37' } }}
+                        right={<TextInput.Icon icon="calendar" iconColor="#D4AF37" />}
+                    />
 
-            {showCalendar && (
-                <DateTimePicker
-                    value={date}
-                    mode="date"
-                    display={Platform.OS === 'ios' ? 'inline' : 'default'}
-                    onChange={onChange}
-                />
-            )}
+                    {showCalendar && (
+                        <DateTimePicker
+                            value={date}
+                            mode="date"
+                            display={Platform.OS === 'ios' ? 'inline' : 'default'}
+                            onChange={onChange}
+                        />
+                    )}
 
-            {showTimePicker && (
-                <DateTimePicker
-                    value={date}
-                    mode="time"
-                    is24Hour={true}
-                    display={Platform.OS === 'ios' ? 'spinner' : 'default'}
-                    onChange={onTimeChange}
-                />
-            )}
+                    <TextInput
+                        label='Horário'
+                        mode='flat'
+                        value={time}
+                        showSoftInputOnFocus={false}
+                        onPressIn={() => setShowTimePicker(true)}
+                        style={styles.input}
+                        textColor="#fff"
+                        theme={{ colors: { primary: '#D4AF37', onSurfaceVariant: '#D4AF37' } }}
+                        right={<TextInput.Icon icon="clock" iconColor="#D4AF37" />}
+                    />
+                </View>
 
-        </KeyboardAvoidingView>
+                {showTimePicker && (
+                    <DateTimePicker
+                        value={date}
+                        mode="time"
+                        is24Hour={true}
+                        display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+                        onChange={onTimeChange}
+                    />
+                )}
+
+                <View style={styles.formContainer}>
+                    <TextInput
+                        label='Cliente'
+                        mode='flat'
+                        value={client}
+                        onChangeText={text => setClient(text)}
+                        style={styles.input}
+                        textColor="#fff"
+                        theme={{ colors: { primary: '#D4AF37', onSurfaceVariant: '#D4AF37' } }}
+                    />
+
+                    <TextInput
+                        label='Detalhes'
+                        mode='flat'
+                        value={details}
+                        onChangeText={text => setDetails(text)}
+                        style={styles.input}
+                        textColor="#fff"
+                        theme={{ colors: { primary: '#D4AF37', onSurfaceVariant: '#D4AF37' } }}
+                    />
+
+                    <View style={styles.checkboxContainer}>
+                        <View style={styles.checkbox}>
+                            <Text style={styles.checkboxText}>Mão</Text>
+                            <TextInput
+                                label='R$'
+                                value={priceHand}
+                                onChangeText={text => setPriceHand(text)}
+                                style={styles.inputPrice}
+                                keyboardType="numeric"
+                                textColor="#fff"
+                                theme={{ colors: { primary: '#D4AF37', onSurfaceVariant: '#D4AF37' } }}
+                            />
+                        </View>
+
+                        <View style={styles.checkbox}>
+                            <Text style={styles.checkboxText}>Pé</Text>
+                            <TextInput
+                                label='R$'
+                                value={priceFoot}
+                                onChangeText={text => setPriceFoot(text)}
+                                style={styles.inputPrice}
+                                keyboardType="numeric"
+                                textColor="#fff"
+                                theme={{ colors: { primary: '#D4AF37', onSurfaceVariant: '#D4AF37' } }}
+                            />
+                        </View>
+                    </View>
+
+                </View>
+
+                <TouchableOpacity
+                    style={[styles.buttonContainer, loading && { opacity: 0.7 }]}
+                    onPress={handleSubmit}
+                    disabled={loading}
+                >
+                    <Text style={styles.button}>
+                        {loading ? 'Carregando...' : 'Salvar '}
+                        {!loading}
+                    </Text>
+                </TouchableOpacity>
+
+            </KeyboardAvoidingView>
+        </TouchableWithoutFeedback>
     )
 }
 
@@ -194,7 +228,7 @@ const styles = StyleSheet.create({
     },
     backButton: {
         width: '25%',
-        height: 30,
+        height: 45,
         backgroundColor: '#D4AF37',
         borderRadius: 12,
         justifyContent: 'center',
@@ -243,7 +277,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#252525',
         borderTopLeftRadius: 12,
         borderTopRightRadius: 12,
-        borderRadius: 12,
         marginBottom: 15,
         borderWidth: 1,
         borderColor: '#333',
@@ -252,12 +285,12 @@ const styles = StyleSheet.create({
         borderColor: '#333',
         borderWidth: 1,
         borderRadius: 12,
-        padding: 10,
+        paddingVertical: 20,
         width: '100%',
         alignItems: 'center',
     },
     checkboxContainer: {
-        width: '90%',
+        width: '50%',
         marginTop: 10,
     },
     checkbox: {
@@ -273,7 +306,6 @@ const styles = StyleSheet.create({
         width: 80,
         height: 40,
         backgroundColor: '#252525',
-        borderRadius: 12,
         borderTopLeftRadius: 12,
         borderTopRightRadius: 12,
         borderWidth: 1,

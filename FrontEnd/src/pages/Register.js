@@ -1,13 +1,41 @@
-import { Image, KeyboardAvoidingView, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { Alert, Image, KeyboardAvoidingView, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { TextInput } from 'react-native-paper';
 import nailIcon from '../assets/nail.png';
 import { useState } from "react";
+import { FontAwesome6 } from '@expo/vector-icons';
+import Axios from "../utils/Axios.js";
+import SummaryApi from "../common/SummaryApi.js";
+import AxiosToastError from "../utils/AxiosToastError.js";
 
 const Register = ({ navigation }) => {
     const [user, setUser] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    const handleRegister = async () => {
+        if (!user || !email || !password) {
+            Alert.alert("Erro", "Preencha todos os campos!");
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const response = await Axios({
+                ...SummaryApi.register,
+                data: { name: user, email, password }
+            });
+
+            if (response.data.success) {
+                Alert.alert("Sucesso", response.data.message);
+                navigation.navigate('Login');
+            }
+        } catch (error) {
+            AxiosToastError(error);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <KeyboardAvoidingView
@@ -23,13 +51,12 @@ const Register = ({ navigation }) => {
 
             <TouchableOpacity style={styles.inputContainer}>
                 <TextInput
-                    label='Nome'
+                    label='Usuário'
                     mode='flat'
                     value={user}
                     onChangeText={text => setUser(text)}
                     style={styles.input}
                     textColor="#fff"
-                    underlineColor="transparent"
                     activeUnderlineColor="#D4AF37"
                     theme={{ colors: { primary: '#D4AF37', onSurfaceVariant: '#D4AF37' } }}
                     left={<TextInput.Icon icon="account-outline" color="#D4AF37" />}
@@ -44,7 +71,6 @@ const Register = ({ navigation }) => {
                     onChangeText={text => setEmail(text)}
                     style={styles.input}
                     textColor="#fff"
-                    underlineColor="transparent"
                     activeUnderlineColor="#D4AF37"
                     theme={{ colors: { primary: '#D4AF37', onSurfaceVariant: '#D4AF37' } }}
                     left={<TextInput.Icon icon="account-outline" color="#D4AF37" />}
@@ -59,7 +85,6 @@ const Register = ({ navigation }) => {
                     onChangeText={text => setPassword(text)}
                     style={styles.input}
                     textColor="#fff"
-                    underlineColor="transparent"
                     activeUnderlineColor="#D4AF37"
                     theme={{ colors: { primary: '#D4AF37', onSurfaceVariant: '#D4AF37' } }}
                     left={<TextInput.Icon icon="lock-outline" color="#D4AF37" />}
@@ -67,25 +92,14 @@ const Register = ({ navigation }) => {
                 />
             </TouchableOpacity>
 
-            <TouchableOpacity style={styles.inputContainer}>
-                <TextInput
-                    label='Confirmar senha'
-                    mode='flat'
-                    value={confirmPassword}
-                    onChangeText={text => setConfirmPassword(text)}
-                    style={styles.input}
-                    textColor="#fff"
-                    underlineColor="transparent"
-                    activeUnderlineColor="#D4AF37"
-                    theme={{ colors: { primary: '#D4AF37', onSurfaceVariant: '#D4AF37' } }}
-                    left={<TextInput.Icon icon="account-outline" color="#D4AF37" />}
-                    secureTextEntry
-                />
-            </TouchableOpacity>
-
-            <TouchableOpacity style={styles.confirmContainer}>
+            <TouchableOpacity
+                style={[styles.confirmContainer, loading && { opacity: 0.7 }]}
+                onPress={handleRegister}
+                disabled={loading}
+            >
                 <Text style={styles.confirm}>
-                    Salvar
+                    {loading ? 'Carregando...' : 'Cadastrar '}
+                    {!loading && <FontAwesome6 name="arrow-right" style={styles.arrow} />}
                 </Text>
             </TouchableOpacity>
 
@@ -139,7 +153,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#252525',
         borderTopLeftRadius: 12,
         borderTopRightRadius: 12,
-        borderRadius: 12,
         marginBottom: 15,
         borderWidth: 1,
         borderColor: '#333',
