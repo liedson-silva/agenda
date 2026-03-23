@@ -5,22 +5,36 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "userInterfaceStyle": "dark", 
+    "backgroundColor": "#1A1A1A",
     "splash": {
       "image": "./assets/splash-icon.png",
       "resizeMode": "contain",
-      "backgroundColor": "#000000"
+      "backgroundColor": "#1A1A1A"
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.liedson.Agenda"
+      "bundleIdentifier": "com.liedson.Agenda",
+      "backgroundColor": "#1A1A1A"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#000000"
+        "backgroundColor": "#1A1A1A"
       },
-      "package": "com.liedson.Agenda"
+      "package": "com.liedson.Agenda",
+      "backgroundColor": "#1A1A1A",
+      "softwareKeyboardLayoutMode": "pan"
+    },
+    "androidNavigationBar": {
+      "backgroundColor": "#1A1A1A",
+      "barStyle": "light-content"
+    },
+    "web": {
+      "favicon": "./assets/icon.png",
+      "display": "standalone",
+      "backgroundColor": "#1A1A1A",
+      "themeColor": "#D4AF37"
     },
     "plugins": [
       "@react-native-community/datetimepicker"
