@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Text, View, StyleSheet, TouchableOpacity, StatusBar, Alert, } from "react-native"
-import FontAwesome6 from 'react-native-vector-icons/FontAwesome6';
+import { FontAwesome6 } from '@expo/vector-icons';
 import AxiosToastError from "../utils/AxiosToastError";
 import Axios from "../utils/Axios";
 import SummaryApi from "../common/SummaryApi";
