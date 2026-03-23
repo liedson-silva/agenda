@@ -17,6 +17,14 @@ const SummaryApi = {
         url: '/client/my-appointments',
         method: 'get',
     },
+    deleteAppointment: (id) => ({
+        url: `/client/delete-appointment/${id}`,
+        method: 'delete',
+    }),
+    updateAppointment: (id) => ({
+        url: `/client/update-appointment/${id}`,
+        method: 'put',
+    }),
 }
 
 export default SummaryApi;

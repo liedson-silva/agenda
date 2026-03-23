@@ -19,7 +19,7 @@ export async function CreateAppointment(req, res) {
             })
         }
 
-        const existingAppointment = await ClientModel.findOne({ date, hour });
+        const existingAppointment = await ClientModel.findOne({ date, hour, userId: req.userId });
         if (existingAppointment) {
             return res.status(400).json({
                 message: 'Já possui um agendamento para este horário!',
@@ -56,12 +56,6 @@ export async function GetAppointmentByUser(req, res) {
         }
 
         const appointments = await ClientModel.find({ userId }).sort({ date: 1, hour: 1 });
-        if (!appointments || appointments.length === 0) {
-            return res.status(404).json({
-                message: "Nenhum agendamento encontrado!",
-                error: true, success: false
-            });
-        }
 
         return res.json({
             message: "Agendamentos do usuário carregados!",
@@ -79,3 +73,73 @@ export async function GetAppointmentByUser(req, res) {
     }
 }
 
+export async function DeleteAppointment(req, res) {
+    try {
+        const { id } = req.params;
+        const userId = req.userId;
+
+        const appointment = await ClientModel.findOne({ _id: id, userId });
+
+        await ClientModel.deleteOne({ _id: id, userId });
+
+        return res.json({
+            message: "Agendamento deletado com sucesso!",
+            success: true,
+            error: false
+        });
+    } catch (error) {
+        return res.status(500).json({
+            message: error.message || error,
+            error: true, success: false
+        });
+    }
+}
+
+export async function UpdateAppointment(req, res) {
+    try {
+        const { id } = req.params;
+        const { date, hour, client, details, hand, foot } = req.body;
+        const userId = req.userId;
+
+        if (!date || !hour || !client) {
+            return res.status(400).json({
+                message: 'Campos obrigatórios não preenchidos!',
+                error: true, success: false
+            })
+        }
+
+        if (!hand && !foot) {
+            return res.status(400).json({
+                message: 'Selecione ao menos um serviço (Mão ou Pé)!',
+                error: true, success: false
+            })
+        }
+
+        const conflict = await ClientModel.findOne({ date, hour, userId, _id: { $ne: id } });
+        if (conflict) {
+            return res.status(400).json({
+                message: "Você já possui outro agendamento neste horário!",
+                error: true,
+                success: false
+            });
+        }
+
+        const updatedAppointment = await ClientModel.findOneAndUpdate(
+            { _id: id, userId },
+            { date, hour, client, details, hand, foot },
+            { new: true }
+        );
+
+        return res.json({
+            message: "Agendamento atualizado com sucesso!",
+            data: updatedAppointment,
+            success: true,
+            error: false
+        });
+    } catch (error) {
+        return res.status(500).json({
+            message: error.message || error,
+            error: true, success: false
+        });
+    }
+}

@@ -8,7 +8,7 @@ import SummaryApi from '../common/SummaryApi.js';
 import AxiosToastError from '../utils/AxiosToastError.js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const NewAppointment = ({ navigation }) => {
+const UpdateAppointment = ({ navigation, route }) => {
     const [time, setTime] = useState('');
     const [client, setClient] = useState('');
     const [details, setDetails] = useState('');
@@ -19,6 +19,7 @@ const NewAppointment = ({ navigation }) => {
     const [showTimePicker, setShowTimePicker] = useState(false);
     const [loading, setLoading] = useState(false);
     const [userName, setUserName] = useState('');
+    const { item } = route.params;
 
     const onChange = (event, selectedDate) => {
         setShowCalendar(false);
@@ -51,6 +52,19 @@ const NewAppointment = ({ navigation }) => {
         getUserName();
     }, []);
 
+    useEffect(() => {
+        if (item) {
+            setClient(item.client);
+            setDetails(item.details || '');
+            setPriceHand(item.hand?.toString() || '');
+            setPriceFoot(item.foot?.toString() || '');
+            setTime(item.hour);
+            const datePart = item.date.split('T')[0];
+            const [year, month, day] = datePart.split('-').map(Number);
+            setDate(new Date(year, month - 1, day));
+        }
+    }, [item]);
+
     const handleSubmit = async () => {
         setLoading(true)
         try {
@@ -60,7 +74,7 @@ const NewAppointment = ({ navigation }) => {
                 return parseFloat(value.toString().replace(',', '.'));
             };
             const response = await Axios({
-                ...SummaryApi.createAppointment,
+                ...SummaryApi.updateAppointment(item._id),
                 headers: {
                     Authorization: `Bearer ${token}`
                 },
@@ -93,7 +107,7 @@ const NewAppointment = ({ navigation }) => {
             >
 
                 <View style={styles.backContainer}>
-                    <TouchableOpacity style={styles.backButton} onPress={() => navigation.navigate('Home')}>
+                    <TouchableOpacity style={styles.backButton} onPress={() => navigation.goBack()}>
                         <FontAwesome6 name="arrow-left" style={styles.arrow} />
                         <Text style={styles.backText}>
                             ㅤVoltar
@@ -103,12 +117,12 @@ const NewAppointment = ({ navigation }) => {
 
                 <View style={styles.header}>
                     <Text style={styles.title}>Olá, {userName}</Text>
-                    <Text style={styles.subtitle}>Agende um novo horário para sua cliente</Text>
+                    <Text style={styles.subtitle}>Edite o agendamento da {item.client}</Text>
                 </View>
 
                 <View style={styles.inputContainer}>
                     <TextInput
-                        value={date.toLocaleDateString()}
+                        value={date.toLocaleDateString('pt-BR')}
                         onFocus={() => setShowCalendar(true)}
                         label="Data *"
                         showSoftInputOnFocus={false}
@@ -338,4 +352,4 @@ const styles = StyleSheet.create({
     },
 })
 
-export default NewAppointment
+export default UpdateAppointment

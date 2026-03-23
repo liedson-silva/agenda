@@ -14,14 +14,6 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, "Provide password"],
     },
-    forgot_password_otp: {
-        type: String,
-        default: null,
-    },
-    forgot_password_expiry: {
-        type: Date,
-        default: "",
-    },
 }, {
     timestamps: true,
 });

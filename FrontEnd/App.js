@@ -4,6 +4,8 @@ import Login from './src/pages/Login.js';
 import Register from './src/pages/Register.js';
 import Home from './src/pages/Home.js';
 import NewAppointment from './src/pages/NewAppointment.js';
+import DetailsAppointment from './src/pages/DetailsAppointment.js';
+import UpdateAppointment from './src/pages/UpdateAppointment.js';
 
 const Stack = createStackNavigator();
 
@@ -15,6 +17,8 @@ export default function App() {
         <Stack.Screen name="Register" component={Register} />
         <Stack.Screen name="Home" component={Home} />
         <Stack.Screen name="NewAppointment" component={NewAppointment} />
+        <Stack.Screen name="DetailsAppointment" component={DetailsAppointment} />
+        <Stack.Screen name="EditAppointment" component={UpdateAppointment} />
       </Stack.Navigator>
     </NavigationContainer>
   );

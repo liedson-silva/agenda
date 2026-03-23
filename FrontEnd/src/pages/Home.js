@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, TouchableOpacity, Platform, SafeAreaView, StatusBar } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, Platform, SafeAreaView, StatusBar, ScrollView, ActivityIndicator } from 'react-native'
 import { FontAwesome6 } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 import DateTimePicker from '@react-native-community/datetimepicker';
@@ -71,12 +71,47 @@ const Home = ({ navigation }) => {
             }
         } catch (error) {
             AxiosToastError(error);
+        } finally {
+            setLoading(false);
         }
     }
 
     useEffect(() => {
         fetchAppointments();
     }, [itemActive, date]);
+
+    const getFilteredAppointments = () => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const selectedDateStr = date.toLocaleDateString('sv-SE');
+
+        return appointments.filter(item => {
+            const appointmentDateStr = item.date.split('T')[0];
+            const [year, month, day] = appointmentDateStr.split('-').map(Number);
+            const appointmentDate = new Date(year, month - 1, day);
+
+            if (itemActive === 'HOJE') {
+                return appointmentDateStr === selectedDateStr;
+            }
+
+            if (itemActive === 'SEMANA') {
+                const firstDayOfWeek = new Date(today);
+                firstDayOfWeek.setDate(today.getDate() - today.getDay());
+
+                const lastDayOfWeek = new Date(firstDayOfWeek);
+                lastDayOfWeek.setDate(firstDayOfWeek.getDate() + 6);
+
+                return appointmentDate >= firstDayOfWeek && appointmentDate <= lastDayOfWeek;
+            }
+
+            if (itemActive === 'MÊS') {
+                return appointmentDate.getMonth() === today.getMonth() &&
+                    appointmentDate.getFullYear() === today.getFullYear();
+            }
+
+            return true;
+        });
+    };
 
     return (
         <SafeAreaView style={styles.container}>
@@ -126,7 +161,11 @@ const Home = ({ navigation }) => {
                 <View style={styles.statsContainer}>
                     <View style={styles.statsRow}>
                         <Text style={styles.statsLabel}>GANHOS {period}:</Text>
-                        <Text style={styles.statsValue}>R$ {totalEarnings.toFixed(2)}</Text>
+                        <Text style={styles.statsValue}>
+                            R$ {getFilteredAppointments().reduce((acc, curr) =>
+                                acc + (Number(curr.hand) || 0) + (Number(curr.foot) || 0), 0
+                            ).toFixed(2).replace('.', ',')}
+                        </Text>
                     </View>
 
                     {showDate && (
@@ -145,17 +184,30 @@ const Home = ({ navigation }) => {
                 </View>
 
                 <View style={styles.contentContainer}>
-                    <FontAwesome6 name="calendar-xmark" style={styles.contentIcon} />
-                    <Text style={styles.contentContainerTitle}>Nada agendado para esta data!</Text>
-
-                    <View style={styles.instructions}>
-                        <Text style={styles.instructionText}>
-                            <Text style={styles.gold}>*</Text> Para adicionar um novo agendamento, toque no "+";
-                        </Text>
-                        <Text style={styles.instructionText}>
-                            <Text style={styles.gold}>*</Text> Para detalhes sobre o agendamento, toque sobre ele;
-                        </Text>
-                    </View>
+                    {loading ? (
+                        <ActivityIndicator size="large" color="#D4AF37" />
+                    ) : getFilteredAppointments().length > 0 ? (
+                        <ScrollView style={{ width: '100%' }} showsVerticalScrollIndicator={false}>
+                            {getFilteredAppointments().map((item) => (
+                                <TouchableOpacity onPress={() => navigation.navigate("DetailsAppointment", {item})} key={item._id} style={styles.appointmentCard}>
+                                    <View>
+                                        <Text style={styles.clientName}>{item.client}</Text>
+                                        <Text style={styles.serviceText}>
+                                            {item.hand > 0 ? '• Mão ' : ''}{item.foot > 0 ? '• Pé' : ''}
+                                        </Text>
+                                    </View>
+                                    <View style={styles.hourBadge}>
+                                        <Text style={styles.hourText}>{item.hour}</Text>
+                                    </View>
+                                </TouchableOpacity>
+                            ))}
+                        </ScrollView>
+                    ) : (
+                        <View style={{ alignItems: 'center' }}>
+                            <FontAwesome6 name="calendar-xmark" style={styles.contentIcon} />
+                            <Text style={styles.contentContainerTitle}>Nenhum agendamento encontrado!</Text>
+                        </View>
+                    )}
 
                     <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('NewAppointment')}>
                         <Text style={styles.addButtonText}>+</Text>
@@ -324,27 +376,35 @@ const styles = StyleSheet.create({
         fontSize: 18,
         marginBottom: 10,
     },
-    contentContainerText: {
-        color: '#D4AF37',
-        fontSize: 16,
+    appointmentCard: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        backgroundColor: '#2A2A2A',
+        padding: 15,
+        borderRadius: 12,
         marginBottom: 10,
-    },
-    instructions: {
         width: '100%',
-        borderTopWidth: 1,
-        borderTopColor: '#333',
-        paddingTop: 20,
+        borderLeftWidth: 4,
+        borderLeftColor: '#D4AF37'
     },
-    instructionText: {
+    clientName: {
         color: '#fff',
-        fontSize: 13,
-        opacity: 0.5,
-        marginBottom: 8,
-        lineHeight: 18,
+        fontSize: 16,
+        fontWeight: 'bold'
     },
-    gold: {
+    serviceText: {
         color: '#D4AF37',
-        fontWeight: 'bold',
+        fontSize: 12
+    },
+    hourBadge: {
+        backgroundColor: '#D4AF3722',
+        padding: 5,
+        borderRadius: 6
+    },
+    hourText: {
+        color: '#D4AF37',
+        fontWeight: 'bold'
     },
     addButton: {
         position: 'absolute',
@@ -356,17 +416,12 @@ const styles = StyleSheet.create({
         backgroundColor: '#D4AF37',
         justifyContent: 'center',
         alignItems: 'center',
-        shadowColor: '#D4AF37',
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.3,
-        shadowRadius: 4,
-        elevation: 8,
+        elevation: 8
     },
     addButtonText: {
         color: '#1A1A1A',
         fontSize: 30,
-        fontWeight: 'bold',
-        lineHeight: 30,
+        fontWeight: 'bold'
     },
 })
 
