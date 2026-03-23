@@ -1,7 +1,8 @@
 import axios from "axios"
+import { baseUrl } from "../common/SummaryApi";
 
 const Axios = axios.create({
-    baseURL: 'http://192.168.1.14:3000',
+    baseURL: baseUrl,
 });
 
 export default Axios;

@@ -21,5 +21,4 @@ Esta interface foi projetada para oferecer agilidade e controle total sobre a ro
    
 <div align="center">
   <img src="./FrontEnd/src/assets/imagemApp.jpeg" width="300" alt="Screenshot do App" />
-  <p><i>Interface principal com modo escuro e detalhes em dourado.</i></p>
 </div>
