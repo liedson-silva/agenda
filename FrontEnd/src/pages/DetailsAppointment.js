@@ -106,6 +106,19 @@ const DetailsAppointment = ({ navigation, route }) => {
                             <Text style={styles.value}>R$ {item.foot.toFixed(2)}</Text>
                         </View>
                     )}
+                    {item.busso > 0 && (
+                        <View style={styles.serviceRow}>
+                            <Text style={styles.value}>• Busso</Text>
+                            <Text style={styles.value}>R$ {item.busso.toFixed(2)}</Text>
+                        </View>
+                    )}
+                    {item.eyebrow > 0 && (
+                        <View style={styles.serviceRow}>
+                            <Text style={styles.value}>• Sobrancelha</Text>
+                            <Text style={styles.value}>R$ {item.eyebrow.toFixed(2)}</Text>
+                        </View>
+                    )}
+
                     {item.details && item.details.length > 0 && (
                         <View style={styles.infoGroup}>
                             <Text style={styles.label}>Observações:</Text>
@@ -115,7 +128,7 @@ const DetailsAppointment = ({ navigation, route }) => {
                 </View>
                 <View style={styles.totalContainer}>
                     <Text style={styles.totalLabel}>TOTAL RECEBIDO</Text>
-                    <Text style={styles.totalValue}>R$ {(item.hand + item.foot).toFixed(2)}</Text>
+                    <Text style={styles.totalValue}>R$ {(item.hand + item.foot + item.busso + item.eyebrow).toFixed(2)}</Text>
                 </View>
             </View>
 

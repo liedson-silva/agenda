@@ -1,4 +1,4 @@
-import { Text, View, StyleSheet, KeyboardAvoidingView, Platform, TouchableOpacity, TouchableWithoutFeedback, Keyboard, Alert } from 'react-native'
+import { Text, View, StyleSheet, KeyboardAvoidingView, Platform, TouchableOpacity, Keyboard, Alert } from 'react-native'
 import { TextInput } from 'react-native-paper';
 import { useEffect, useState } from 'react';
 import { FontAwesome6 } from '@expo/vector-icons';
@@ -14,6 +14,8 @@ const NewAppointment = ({ navigation }) => {
     const [details, setDetails] = useState('');
     const [priceHand, setPriceHand] = useState('');
     const [priceFoot, setPriceFoot] = useState('');
+    const [priceBusso, setPriceBusso] = useState('');
+    const [priceEyebrow, setPriceEyebrow] = useState('');
     const [date, setDate] = useState(new Date());
     const [showCalendar, setShowCalendar] = useState(false);
     const [showTimePicker, setShowTimePicker] = useState(false);
@@ -55,6 +57,11 @@ const NewAppointment = ({ navigation }) => {
         setLoading(true)
         try {
             const token = await AsyncStorage.getItem('token');
+
+            const year = date.getFullYear();
+            const month = (date.getMonth() + 1).toString().padStart(2, '0');
+            const day = date.getDate().toString().padStart(2, '0');
+            const formattedDate = `${year}-${month}-${day}`;
             const formatPrice = (value) => {
                 if (!value) return 0;
                 return parseFloat(value.toString().replace(',', '.'));
@@ -65,12 +72,14 @@ const NewAppointment = ({ navigation }) => {
                     Authorization: `Bearer ${token}`
                 },
                 data: {
-                    date: date.toISOString().split('T')[0],
+                    date: formattedDate,
                     hour: time,
                     client: client,
                     details: details,
                     hand: formatPrice(priceHand),
                     foot: formatPrice(priceFoot),
+                    busso: formatPrice(priceBusso),
+                    eyebrow: formatPrice(priceEyebrow),
                 }
             });
 
@@ -86,9 +95,9 @@ const NewAppointment = ({ navigation }) => {
     }
 
     return (
-        <TouchableWithoutFeedback onPress={() => { Keyboard.dismiss(); setShowCalendar(false); setShowTimePicker(false) }} accessible={false}>
+        <View style={{ flex: 1 }}>
             <KeyboardAvoidingView
-                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                behavior={Platform.OS === 'ios' ? 'padding' : undefined}
                 style={styles.container}
             >
 
@@ -107,17 +116,31 @@ const NewAppointment = ({ navigation }) => {
                 </View>
 
                 <View style={styles.inputContainer}>
-                    <TextInput
-                        value={date.toLocaleDateString()}
-                        onFocus={() => setShowCalendar(true)}
-                        label="Data *"
-                        showSoftInputOnFocus={false}
-                        mode="flat"
-                        style={styles.input}
-                        textColor="#fff"
-                        theme={{ colors: { primary: '#D4AF37', onSurfaceVariant: '#D4AF37' } }}
-                        right={<TextInput.Icon icon="calendar" iconColor="#D4AF37" />}
-                    />
+                    {Platform.OS !== 'web' ? (
+                        <TextInput
+                            value={date.toLocaleDateString()}
+                            onFocus={() => setShowCalendar(true)}
+                            label="Data *"
+                            showSoftInputOnFocus={false}
+                            mode="flat"
+                            style={styles.input}
+                            textColor="#fff"
+                            theme={{ colors: { primary: '#D4AF37', onSurfaceVariant: '#D4AF37' } }}
+                            right={<TextInput.Icon icon="calendar" iconColor="#D4AF37" />}
+                        />) : (
+                        <input
+                            type="date"
+                            style={styles.input}
+                            value={date.toISOString().split('T')[0]}
+                            onChange={(e) => {
+                                const dateString = e.target.value;
+                                if (dateString) {
+                                    const [year, month, day] = dateString.split('-').map(Number);
+                                    setDate(new Date(year, month - 1, day));
+                                }
+                            }}
+                        />
+                    )}
 
                     {showCalendar && (
                         <DateTimePicker
@@ -128,17 +151,27 @@ const NewAppointment = ({ navigation }) => {
                         />
                     )}
 
-                    <TextInput
-                        label='Horário *'
-                        mode='flat'
-                        value={time}
-                        showSoftInputOnFocus={false}
-                        onPressIn={() => setShowTimePicker(true)}
-                        style={styles.input}
-                        textColor="#fff"
-                        theme={{ colors: { primary: '#D4AF37', onSurfaceVariant: '#D4AF37' } }}
-                        right={<TextInput.Icon icon="clock" iconColor="#D4AF37" />}
-                    />
+                    {Platform.OS !== 'web' ? (
+                        <TextInput
+                            label='Horário *'
+                            mode='flat'
+                            value={time}
+                            showSoftInputOnFocus={false}
+                            onPressIn={() => setShowTimePicker(true)}
+                            style={styles.input}
+                            textColor="#fff"
+                            theme={{ colors: { primary: '#D4AF37', onSurfaceVariant: '#D4AF37' } }}
+                            right={<TextInput.Icon icon="clock" iconColor="#D4AF37" />}
+                        />
+                    ) : (
+                        <input
+                            type="time"
+                            style={styles.input}
+                            value={time}
+                            onChange={(e) => setTime(e.target.value)}
+                        />
+                    )}
+
                 </View>
 
                 {showTimePicker && (
@@ -174,7 +207,7 @@ const NewAppointment = ({ navigation }) => {
 
                     <View style={styles.checkboxContainer}>
                         <View style={styles.checkbox}>
-                            <Text style={styles.checkboxText}>Mão</Text>
+                            <Text style={styles.checkboxText}>M</Text>
                             <TextInput
                                 label='R$'
                                 value={priceHand}
@@ -187,11 +220,39 @@ const NewAppointment = ({ navigation }) => {
                         </View>
 
                         <View style={styles.checkbox}>
-                            <Text style={styles.checkboxText}>Pé</Text>
+                            <Text style={styles.checkboxText}>P</Text>
                             <TextInput
                                 label='R$'
                                 value={priceFoot}
                                 onChangeText={text => setPriceFoot(text)}
+                                style={styles.inputPrice}
+                                keyboardType="numeric"
+                                textColor="#fff"
+                                theme={{ colors: { primary: '#D4AF37', onSurfaceVariant: '#D4AF37' } }}
+                            />
+                        </View>
+                    </View>
+
+                    <View style={styles.checkboxContainer}>
+                        <View style={styles.checkbox}>
+                            <Text style={styles.checkboxText}>S</Text>
+                            <TextInput
+                                label='R$'
+                                value={priceEyebrow}
+                                onChangeText={text => setPriceEyebrow(text)}
+                                style={styles.inputPrice}
+                                keyboardType="numeric"
+                                textColor="#fff"
+                                theme={{ colors: { primary: '#D4AF37', onSurfaceVariant: '#D4AF37' } }}
+                            />
+                        </View>
+
+                        <View style={styles.checkbox}>
+                            <Text style={styles.checkboxText}>B</Text>
+                            <TextInput
+                                label='R$'
+                                value={priceBusso}
+                                onChangeText={text => setPriceBusso(text)}
                                 style={styles.inputPrice}
                                 keyboardType="numeric"
                                 textColor="#fff"
@@ -209,12 +270,11 @@ const NewAppointment = ({ navigation }) => {
                 >
                     <Text style={styles.button}>
                         {loading ? 'Carregando...' : 'Salvar '}
-                        {!loading}
                     </Text>
                 </TouchableOpacity>
 
             </KeyboardAvoidingView>
-        </TouchableWithoutFeedback>
+        </View>
     )
 }
 
@@ -284,6 +344,8 @@ const styles = StyleSheet.create({
         marginBottom: 15,
         borderWidth: 1,
         borderColor: '#333',
+        border: '1px solid #D4AF3733',
+        color: '#D4AF37',
     },
     formContainer: {
         borderColor: '#333',
@@ -294,11 +356,12 @@ const styles = StyleSheet.create({
         alignItems: 'center',
     },
     checkboxContainer: {
-        width: '50%',
-        marginTop: 10,
+        flexDirection: 'row',
+        gap: 50,
     },
     checkbox: {
         flexDirection: 'row',
+        gap: 10,
         alignItems: 'center',
         justifyContent: 'space-between',
     },

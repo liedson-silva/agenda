@@ -2,7 +2,7 @@ import ClientModel from "../models/client.model.js";
 
 export async function CreateAppointment(req, res) {
     try {
-        const { date, hour, client, details, hand, foot } = req.body;
+        const { date, hour, client, details, hand, foot, busso, eyebrow } = req.body;
         const userId = req.userId;
 
         if (!date || !hour || !client) {
@@ -12,9 +12,9 @@ export async function CreateAppointment(req, res) {
             })
         }
 
-        if (!hand && !foot) {
+        if (!hand && !foot && !busso && !eyebrow) {
             return res.status(400).json({
-                message: 'Selecione ao menos um serviço (Mão ou Pé)!',
+                message: 'Selecione ao menos um serviço (Mão, Pé, Busso ou Sobrancelha)!',
                 error: true, success: false
             })
         }
@@ -27,7 +27,7 @@ export async function CreateAppointment(req, res) {
             });
         }
 
-        const payload = { date, hour, client, details, hand, foot, userId }
+        const payload = { date, hour, client, details, hand, foot, busso, eyebrow, userId }
         const newClient = new ClientModel(payload)
         const save = await newClient.save()
 
@@ -98,7 +98,7 @@ export async function DeleteAppointment(req, res) {
 export async function UpdateAppointment(req, res) {
     try {
         const { id } = req.params;
-        const { date, hour, client, details, hand, foot } = req.body;
+        const { date, hour, client, details, hand, foot, busso, eyebrow } = req.body;
         const userId = req.userId;
 
         if (!date || !hour || !client) {
@@ -108,9 +108,9 @@ export async function UpdateAppointment(req, res) {
             })
         }
 
-        if (!hand && !foot) {
+        if (!hand && !foot && !busso && !eyebrow) {
             return res.status(400).json({
-                message: 'Selecione ao menos um serviço (Mão ou Pé)!',
+                message: 'Selecione ao menos um serviço (Mão, Pé, Busso ou Sobrancelha)!',
                 error: true, success: false
             })
         }
@@ -126,7 +126,7 @@ export async function UpdateAppointment(req, res) {
 
         const updatedAppointment = await ClientModel.findOneAndUpdate(
             { _id: id, userId },
-            { date, hour, client, details, hand, foot },
+            { date, hour, client, details, hand, foot, busso, eyebrow },
             { new: true }
         );
 

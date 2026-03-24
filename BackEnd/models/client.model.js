@@ -25,6 +25,14 @@ const clientSchema = new mongoose.Schema({
         type: Number,
         default: 0,
     },
+    busso: {
+        type: Number,
+        default: 0,
+    },
+    eyebrow: {
+        type: Number,
+        default: 0,
+    },
     userId: {
     type: mongoose.Schema.ObjectId,
     ref: "User",

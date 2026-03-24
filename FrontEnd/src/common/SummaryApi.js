@@ -1,4 +1,4 @@
-export const baseUrl = 'https://agenda-sable-xi.vercel.app';
+export const baseUrl = 'http://192.168.1.14:3000';
 
 const SummaryApi = {
     register: {

@@ -6,6 +6,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import AxiosToastError from '../utils/AxiosToastError';
 import SummaryApi from '../common/SummaryApi';
 import Axios from '../utils/Axios';
+import formatDate from '../components/FormatDate';
 
 const Home = ({ navigation }) => {
     const [itemActive, setItemActive] = useState('HOJE');
@@ -168,11 +169,27 @@ const Home = ({ navigation }) => {
                         </Text>
                     </View>
 
-                    {showDate && (
-                        <TouchableOpacity style={styles.dateSelector} onPress={() => setShowCalendar(true)}>
-                            <Text style={styles.dateText}>{date.toLocaleDateString('pt-BR')}</Text>
-                            <FontAwesome6 name="magnifying-glass" style={styles.searchIcon} />
-                        </TouchableOpacity>
+                    {showDate && (<>
+                        {Platform.OS !== 'web' ? (
+                            <TouchableOpacity style={styles.dateSelector} onPress={() => setShowCalendar(true)}>
+                                <Text style={styles.dateText}>{date.toLocaleDateString('pt-BR')}</Text>
+                                <FontAwesome6 name="magnifying-glass" style={styles.searchIcon} />
+                            </TouchableOpacity>
+                        ) : (
+                            <input
+                                type="date"
+                                style={styles.dateSelector}
+                                value={date.toISOString().split('T')[0]}
+                                onChange={(e) => {
+                                    const dateString = e.target.value;
+                                    if (dateString) {
+                                        const [year, month, day] = dateString.split('-').map(Number);
+                                        setDate(new Date(year, month - 1, day));
+                                    }
+                                }}
+                            />
+                        )}
+                    </>
                     )}
 
                     {showDate && (
@@ -189,15 +206,16 @@ const Home = ({ navigation }) => {
                     ) : getFilteredAppointments().length > 0 ? (
                         <ScrollView style={{ width: '100%' }} showsVerticalScrollIndicator={false}>
                             {getFilteredAppointments().map((item) => (
-                                <TouchableOpacity onPress={() => navigation.navigate("DetailsAppointment", {item})} key={item._id} style={styles.appointmentCard}>
+                                <TouchableOpacity onPress={() => navigation.navigate("DetailsAppointment", { item })} key={item._id} style={styles.appointmentCard}>
                                     <View>
                                         <Text style={styles.clientName}>{item.client}</Text>
                                         <Text style={styles.serviceText}>
-                                            {item.hand > 0 ? '• Mão ' : ''}{item.foot > 0 ? '• Pé' : ''}
+                                            {item.hand > 0 ? '• Mão ' : ''}{item.foot > 0 ? '• Pé' : ''} {item.busso > 0 ? '• B' : ''} {item.eyebrow > 0 ? '• S' : ''}
                                         </Text>
                                     </View>
                                     <View style={styles.hourBadge}>
-                                        <Text style={styles.hourText}>{item.hour}</Text>
+                                        <Text style={styles.hourBadgeText}>{item.hour}</Text>
+                                        <Text style={styles.dateBadgeText}>{formatDate(item.date)}</Text>
                                     </View>
                                 </TouchableOpacity>
                             ))}
@@ -205,7 +223,7 @@ const Home = ({ navigation }) => {
                     ) : (
                         <View style={{ alignItems: 'center' }}>
                             <FontAwesome6 name="calendar-xmark" style={styles.contentIcon} />
-                            <Text style={styles.contentContainerTitle}>Nenhum agendamento encontrado!</Text>
+                            <Text style={styles.contentContainerTitle}>Nenhum agendamento!</Text>
                         </View>
                     )}
 
@@ -214,7 +232,7 @@ const Home = ({ navigation }) => {
                     </TouchableOpacity>
                 </View>
 
-                {showCalendar && (
+                {showCalendar && Platform.OS !== 'web' && (
                     <DateTimePicker
                         value={date}
                         mode="date"
@@ -330,9 +348,11 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
         backgroundColor: '#252525',
+        color: '#fff',
         padding: 12,
         borderRadius: 10,
         marginTop: 15,
+        border: '1px solid #D4AF3733',
     },
     dateText: {
         color: '#fff',
@@ -402,9 +422,15 @@ const styles = StyleSheet.create({
         padding: 5,
         borderRadius: 6
     },
-    hourText: {
+    hourBadgeText: {
         color: '#D4AF37',
         fontWeight: 'bold'
+    },
+    dateBadgeText: {
+        color: '#D4AF37',
+        fontSize: 10,
+        textAlign: 'center',
+        opacity: 0.8
     },
     addButton: {
         position: 'absolute',

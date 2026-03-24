@@ -4,18 +4,25 @@ import jwt from "jsonwebtoken";
 
 export async function RegisterUser(req, res) {
     try {
-        const { name, email, password } = req.body;
-        if (!name || !email || !password) {
+        const { name, password, confirmPassword } = req.body;
+        if (!name || !password || !confirmPassword) {
             return res.status(400).json({
                 message: "Campos obrigatórios não preenchidos!",
                 error: true, success: false
             });
         }
 
-        const user = await UserModel.findOne({ email });
+        if (password !== confirmPassword) {
+            return res.status(400).json({
+                message: "As senhas não coincidem!",
+                error: true, success: false
+            });
+        }
+
+        const user = await UserModel.findOne({ name });
         if (user) {
             return res.status(400).json({
-                message: "Já existe usuário com este e-mail.",
+                message: "Já existe usuário com este nome.",
                 error: true, success: false
             });
         }
@@ -24,7 +31,7 @@ export async function RegisterUser(req, res) {
         const hashPassword = await bcrypt.hash(password, salt);
 
 
-        const payload = { name, email, password: hashPassword };
+        const payload = { name, password: hashPassword };
         const newUser = new UserModel(payload);
         const save = await newUser.save();
 
