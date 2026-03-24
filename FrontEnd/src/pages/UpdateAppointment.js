@@ -1,4 +1,4 @@
-import { Text, View, StyleSheet, KeyboardAvoidingView, Platform, TouchableOpacity, TouchableWithoutFeedback, Keyboard, Alert } from 'react-native'
+import { Text, View, StyleSheet, KeyboardAvoidingView, Platform, TouchableOpacity } from 'react-native'
 import { TextInput } from 'react-native-paper';
 import { useEffect, useState } from 'react';
 import { FontAwesome6 } from '@expo/vector-icons';
@@ -48,7 +48,7 @@ const UpdateAppointment = ({ navigation, route }) => {
                     setUserName(savedName.charAt(0).toUpperCase() + savedName.slice(1));
                 }
             } catch (error) {
-                console.log("Erro ao carregar nome:", error);
+                AxiosToastError(error);
             }
         };
         getUserName();
@@ -100,7 +100,6 @@ const UpdateAppointment = ({ navigation, route }) => {
             });
 
             if (response.data.success) {
-                Alert.alert("Sucesso", response.data.message);
                 navigation.navigate('Home');
             }
         } catch (error) {

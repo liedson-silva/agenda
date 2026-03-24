@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Text, View, StyleSheet, TouchableOpacity, Image, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { Text, View, StyleSheet, TouchableOpacity, Image, KeyboardAvoidingView, Platform } from 'react-native';
 import nailIcon from '../assets/nail.png';
 import { FontAwesome6 } from '@expo/vector-icons';
 import { TextInput } from 'react-native-paper';
@@ -14,11 +14,6 @@ const Login = ({ navigation }) => {
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    if (!user || !password) {
-      Alert.alert("Erro", "Preencha todos os campos!");
-      return;
-    }
-
     setLoading(true);
     try {
       const response = await Axios({

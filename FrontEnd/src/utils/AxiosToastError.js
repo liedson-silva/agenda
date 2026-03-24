@@ -1,9 +1,16 @@
-import { Alert } from 'react-native';
+import Toast from 'react-native-toast-message';
 
 const AxiosToastError = (error) => {
-    const errorMessage = error?.response?.data?.message || "Ocorreu um erro inesperado. Verifique sua conexão.";
+  const message = error?.response?.data?.message || "Erro de conexão. Verifique sua internet.";
 
-    Alert.alert("Ops! Algo deu errado", errorMessage);
+  Toast.show({
+    type: 'error',
+    text1: 'Ops! Algo deu errado',
+    text2: message,
+    position: 'top',
+    visibilityTime: 4000,
+    autoHide: true,
+  });
 };
 
 export default AxiosToastError;

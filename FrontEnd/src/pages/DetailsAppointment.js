@@ -5,43 +5,35 @@ import AxiosToastError from "../utils/AxiosToastError";
 import Axios from "../utils/Axios";
 import SummaryApi from "../common/SummaryApi";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import ConfirmBox from "../components/ConfirmBox";
 
 const DetailsAppointment = ({ navigation, route }) => {
-
     const [loading, setLoading] = useState(false);
+    const [showConfirm, setShowConfirm] = useState(false);
     const { item } = route.params;
 
-    const handleDelete = () => {
-        Alert.alert(
-            "Excluir Agendamento",
-            `Tem certeza que deseja excluir o agendamento de ${item.client}?`,
-            [
-                { text: "Cancelar", style: "cancel" },
-                {
-                    text: "Excluir", style: "destructive", onPress: async () => {
-                        setLoading(true);
-                        try {
-                            const token = await AsyncStorage.getItem('token');
-                            const response = await Axios({
-                                ...SummaryApi.deleteAppointment(item._id),
-                                headers: {
-                                    Authorization: `Bearer ${token}`
-                                }
-                            })
+    const handleDeletePress = () => {
+        setShowConfirm(true);
+    };
 
-                            if (response.data.success) {
-                                Alert.alert("Sucesso", response.data.message);
-                                navigation.navigate('Home');
-                            }
-                        } catch (error) {
-                            AxiosToastError(error)
-                        } finally {
-                            setLoading(false);
-                        }
-                    }
-                }
-            ]
-        );
+    const confirmDelete = async () => {
+        setShowConfirm(false);
+        setLoading(true);
+        try {
+            const token = await AsyncStorage.getItem('token');
+            const response = await Axios({
+                ...SummaryApi.deleteAppointment(item._id),
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            if (response.data.success) {
+                navigation.navigate('Home');
+            }
+        } catch (error) {
+            AxiosToastError(error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleEdit = async () => {
@@ -66,10 +58,11 @@ const DetailsAppointment = ({ navigation, route }) => {
                         <FontAwesome6 name="pen-to-square" size={20} color="#D4AF37" />
                     </TouchableOpacity>
 
-                    <TouchableOpacity style={styles.actionButton} onPress={handleDelete}>
+                    <TouchableOpacity style={styles.actionButton} onPress={handleDeletePress}>
                         <FontAwesome6 name="trash-can" size={20} color="#FF4444" />
                     </TouchableOpacity>
                 </View>
+
             </View>
 
             <View style={styles.card}>
@@ -135,6 +128,15 @@ const DetailsAppointment = ({ navigation, route }) => {
             <TouchableOpacity style={styles.finishButton} onPress={() => navigation.navigate('Home')}>
                 <Text style={styles.finishButtonText}>Concluir</Text>
             </TouchableOpacity>
+
+            <ConfirmBox
+                visible={showConfirm}
+                onClose={() => setShowConfirm(false)}
+                onConfirm={confirmDelete}
+                title="Excluir Agendamento"
+                message={`Tem certeza que deseja excluir o agendamento de ${item.client}?`}
+            />
+
         </View>
 
     )

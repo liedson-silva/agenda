@@ -47,7 +47,7 @@ const NewAppointment = ({ navigation }) => {
                     setUserName(savedName.charAt(0).toUpperCase() + savedName.slice(1));
                 }
             } catch (error) {
-                console.log("Erro ao carregar nome:", error);
+                AxiosToastError(error);
             }
         };
         getUserName();
@@ -84,7 +84,6 @@ const NewAppointment = ({ navigation }) => {
             });
 
             if (response.data.success) {
-                Alert.alert("Sucesso", response.data.message);
                 navigation.navigate('Home');
             }
         } catch (error) {
@@ -152,25 +151,29 @@ const NewAppointment = ({ navigation }) => {
                     )}
 
                     {Platform.OS !== 'web' ? (
-                        <TextInput
-                            label='Horário *'
-                            mode='flat'
-                            value={time}
-                            showSoftInputOnFocus={false}
-                            onPressIn={() => setShowTimePicker(true)}
-                            style={styles.input}
-                            textColor="#fff"
-                            theme={{ colors: { primary: '#D4AF37', onSurfaceVariant: '#D4AF37' } }}
-                            right={<TextInput.Icon icon="clock" iconColor="#D4AF37" />}
-                        />
-                    ) : (
-                        <input
-                            type="time"
-                            style={styles.input}
-                            value={time}
-                            onChange={(e) => setTime(e.target.value)}
-                        />
-                    )}
+    <TextInput
+        label='Horário *'
+        mode='flat'
+        value={time}
+        showSoftInputOnFocus={false}
+        onPressIn={() => setShowTimePicker(true)}
+        style={styles.input}
+        textColor="#fff"
+        theme={{ colors: { primary: '#D4AF37', onSurfaceVariant: '#D4AF37' } }}
+        right={<TextInput.Icon icon="clock" iconColor="#D4AF37" />}
+    />
+) : (
+    /* Container que garante a mesma largura do input de Data */
+    <View style={styles.webInputWrapper}>
+        <Text style={styles.webLabel}>Horário *</Text>
+        <input
+            type="time"
+            style={styles.webInputNative}
+            value={time}
+            onChange={(e) => setTime(e.target.value)}
+        />
+    </View>
+)}
 
                 </View>
 
@@ -346,6 +349,29 @@ const styles = StyleSheet.create({
         borderColor: '#333',
         border: '1px solid #D4AF3733',
         color: '#D4AF37',
+    },
+    webInputWrapper: {
+        width: '90%',
+        marginBottom: 15,
+    },
+    webLabel: {
+        color: '#D4AF37',
+        fontSize: 12,
+        marginBottom: 5,
+        marginLeft: 5,
+    },
+    webInputNative: {
+        width: '100%',
+        height: 55,
+        backgroundColor: '#252525',
+        border: '1px solid #D4AF3733',
+        borderTopLeftRadius: 12,
+        borderTopRightRadius: 12,
+        borderWidth: 1,
+        borderColor: '#333',
+        color: '#D4AF37',
+        paddingHorizontal: 15,
+        fontSize: 16,
     },
     formContainer: {
         borderColor: '#333',

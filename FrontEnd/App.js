@@ -6,6 +6,8 @@ import Home from './src/pages/Home.js';
 import NewAppointment from './src/pages/NewAppointment.js';
 import DetailsAppointment from './src/pages/DetailsAppointment.js';
 import UpdateAppointment from './src/pages/UpdateAppointment.js';
+import Toast from 'react-native-toast-message';
+import { toastConfig } from './src/utils/ToastColor.js';
 
 const Stack = createStackNavigator();
 
@@ -20,6 +22,7 @@ export default function App() {
         <Stack.Screen name="DetailsAppointment" component={DetailsAppointment} />
         <Stack.Screen name="EditAppointment" component={UpdateAppointment} />
       </Stack.Navigator>
+        <Toast config={toastConfig} />
     </NavigationContainer>
   );
 }

@@ -34,7 +34,7 @@ const Home = ({ navigation }) => {
                     setUserName(name);
                 }
             } catch (error) {
-                console.log("Erro ao carregar nome:", error);
+                AxiosToastError(error);
             }
         };
         getUserData();
@@ -46,7 +46,7 @@ const Home = ({ navigation }) => {
 
             navigation.replace('Login');
         } catch (e) {
-            console.log("Erro ao sair:", e);
+            AxiosToastError(e);
         }
     };
 
@@ -164,7 +164,7 @@ const Home = ({ navigation }) => {
                         <Text style={styles.statsLabel}>GANHOS {period}:</Text>
                         <Text style={styles.statsValue}>
                             R$ {getFilteredAppointments().reduce((acc, curr) =>
-                                acc + (Number(curr.hand) || 0) + (Number(curr.foot) || 0), 0
+                                acc + (Number(curr.hand) || 0) + (Number(curr.foot) || 0) + (Number(curr.busso) || 0) + (Number(curr.eyebrow) || 0), 0
                             ).toFixed(2).replace('.', ',')}
                         </Text>
                     </View>
@@ -353,6 +353,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         marginTop: 15,
         border: '1px solid #D4AF3733',
+        width: '100%',
     },
     dateText: {
         color: '#fff',
