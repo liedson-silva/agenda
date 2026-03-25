@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Text, View, StyleSheet, TouchableOpacity, StatusBar, Alert, } from "react-native"
 import { FontAwesome6 } from '@expo/vector-icons';
 import AxiosToastError from "../utils/AxiosToastError";
+import AxiosToastSuccess from "../utils/AxiosToastSuccess";
 import Axios from "../utils/Axios";
 import SummaryApi from "../common/SummaryApi";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -27,6 +28,7 @@ const DetailsAppointment = ({ navigation, route }) => {
             });
 
             if (response.data.success) {
+                AxiosToastSuccess(response.data.message);
                 navigation.navigate('Home');
             }
         } catch (error) {

@@ -6,6 +6,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import Axios from '../utils/Axios.js';
 import SummaryApi from '../common/SummaryApi.js';
 import AxiosToastError from '../utils/AxiosToastError.js';
+import AxiosToastSuccess from '../utils/AxiosToastSuccess.js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const UpdateAppointment = ({ navigation, route }) => {
@@ -100,6 +101,7 @@ const UpdateAppointment = ({ navigation, route }) => {
             });
 
             if (response.data.success) {
+                AxiosToastSuccess(response.data.message);
                 navigation.navigate('Home');
             }
         } catch (error) {

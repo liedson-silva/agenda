@@ -1,4 +1,4 @@
-import { Alert, Image, KeyboardAvoidingView, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native"
+import { Image, KeyboardAvoidingView, Platform, StyleSheet, Text, TouchableOpacity, View } from "react-native"
 import { TextInput } from 'react-native-paper';
 import nailIcon from '../assets/nail.png';
 import { useState } from "react";
@@ -6,6 +6,7 @@ import { FontAwesome6 } from '@expo/vector-icons';
 import Axios from "../utils/Axios.js";
 import SummaryApi from "../common/SummaryApi.js";
 import AxiosToastError from "../utils/AxiosToastError.js";
+import AxiosToastSuccess from "../utils/AxiosToastSuccess.js";
 
 const Register = ({ navigation }) => {
     const [user, setUser] = useState('');
@@ -22,7 +23,7 @@ const Register = ({ navigation }) => {
             });
 
             if (response.data.success) {
-                Alert.alert("Sucesso", response.data.message);
+                AxiosToastSuccess(response.data.message);
                 navigation.navigate('Login');
             }
         } catch (error) {

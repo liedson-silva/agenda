@@ -7,6 +7,7 @@ import Axios from '../utils/Axios.js';
 import SummaryApi from '../common/SummaryApi.js';
 import AxiosToastError from '../utils/AxiosToastError.js';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import AxiosToastSuccess from '../utils/AxiosToastSuccess.js';
 
 const NewAppointment = ({ navigation }) => {
     const [time, setTime] = useState('');
@@ -84,6 +85,7 @@ const NewAppointment = ({ navigation }) => {
             });
 
             if (response.data.success) {
+                AxiosToastSuccess(response.data.message);
                 navigation.navigate('Home');
             }
         } catch (error) {

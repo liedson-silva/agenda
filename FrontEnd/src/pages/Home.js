@@ -353,7 +353,7 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         marginTop: 15,
         border: '1px solid #D4AF3733',
-        width: '100%',
+        width: '90%',
     },
     dateText: {
         color: '#fff',
