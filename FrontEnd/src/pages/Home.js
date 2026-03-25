@@ -82,32 +82,33 @@ const Home = ({ navigation }) => {
     }, [itemActive, date]);
 
     const getFilteredAppointments = () => {
+        const selectedDateStr = date.toLocaleDateString('sv-SE');
         const today = new Date();
         today.setHours(0, 0, 0, 0);
-        const selectedDateStr = date.toLocaleDateString('sv-SE');
 
         return appointments.filter(item => {
+            if (!item.date) return false;
             const appointmentDateStr = item.date.split('T')[0];
-            const [year, month, day] = appointmentDateStr.split('-').map(Number);
-            const appointmentDate = new Date(year, month - 1, day);
+            const [y, m, d] = appointmentDateStr.split('-').map(Number);
+            const appointmentDate = new Date(Date.UTC(y, m - 1, d));
+
+            const todayUTC = new Date(Date.UTC(today.getFullYear(), today.getMonth(), today.getDate()));
 
             if (itemActive === 'HOJE') {
                 return appointmentDateStr === selectedDateStr;
             }
 
             if (itemActive === 'SEMANA') {
-                const firstDayOfWeek = new Date(today);
-                firstDayOfWeek.setDate(today.getDate() - today.getDay());
-
+                const firstDayOfWeek = new Date(todayUTC);
+                firstDayOfWeek.setUTCDate(todayUTC.getUTCDate() - todayUTC.getUTCDay());
                 const lastDayOfWeek = new Date(firstDayOfWeek);
-                lastDayOfWeek.setDate(firstDayOfWeek.getDate() + 6);
-
+                lastDayOfWeek.setUTCDate(firstDayOfWeek.getUTCDate() + 6);
                 return appointmentDate >= firstDayOfWeek && appointmentDate <= lastDayOfWeek;
             }
 
             if (itemActive === 'MÊS') {
-                return appointmentDate.getMonth() === today.getMonth() &&
-                    appointmentDate.getFullYear() === today.getFullYear();
+                return appointmentDate.getUTCMonth() === todayUTC.getUTCMonth() &&
+                    appointmentDate.getUTCFullYear() === todayUTC.getUTCFullYear();
             }
 
             return true;
@@ -172,14 +173,14 @@ const Home = ({ navigation }) => {
                     {showDate && (<>
                         {Platform.OS !== 'web' ? (
                             <TouchableOpacity style={styles.dateSelector} onPress={() => setShowCalendar(true)}>
-                                <Text style={styles.dateText}>{date.toLocaleDateString('pt-BR')}</Text>
+                                <Text style={styles.dateText}>{date.toLocaleDateString('sv-SE').split('-').reverse().join('/')}</Text>
                                 <FontAwesome6 name="magnifying-glass" style={styles.searchIcon} />
                             </TouchableOpacity>
                         ) : (
                             <input
                                 type="date"
                                 style={styles.dateSelector}
-                                value={date.toISOString().split('T')[0]}
+                                value={date.toLocaleDateString('sv-SE')}
                                 onChange={(e) => {
                                     const dateString = e.target.value;
                                     if (dateString) {

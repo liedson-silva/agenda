@@ -132,7 +132,7 @@ const NewAppointment = ({ navigation }) => {
                         <input
                             type="date"
                             style={styles.input}
-                            value={date.toISOString().split('T')[0]}
+                            value={date.toLocaleDateString('sv-SE')}
                             onChange={(e) => {
                                 const dateString = e.target.value;
                                 if (dateString) {
@@ -153,29 +153,28 @@ const NewAppointment = ({ navigation }) => {
                     )}
 
                     {Platform.OS !== 'web' ? (
-    <TextInput
-        label='Horário *'
-        mode='flat'
-        value={time}
-        showSoftInputOnFocus={false}
-        onPressIn={() => setShowTimePicker(true)}
-        style={styles.input}
-        textColor="#fff"
-        theme={{ colors: { primary: '#D4AF37', onSurfaceVariant: '#D4AF37' } }}
-        right={<TextInput.Icon icon="clock" iconColor="#D4AF37" />}
-    />
-) : (
-    /* Container que garante a mesma largura do input de Data */
-    <View style={styles.webInputWrapper}>
-        <Text style={styles.webLabel}>Horário *</Text>
-        <input
-            type="time"
-            style={styles.webInputNative}
-            value={time}
-            onChange={(e) => setTime(e.target.value)}
-        />
-    </View>
-)}
+                        <TextInput
+                            label='Horário *'
+                            mode='flat'
+                            value={time}
+                            showSoftInputOnFocus={false}
+                            onPressIn={() => setShowTimePicker(true)}
+                            style={styles.input}
+                            textColor="#fff"
+                            theme={{ colors: { primary: '#D4AF37', onSurfaceVariant: '#D4AF37' } }}
+                            right={<TextInput.Icon icon="clock" iconColor="#D4AF37" />}
+                        />
+                    ) : (
+                        <View style={styles.webInputWrapper}>
+                            <Text style={styles.webLabel}>Horário *</Text>
+                            <input
+                                type="time"
+                                style={styles.webInputNative}
+                                value={time}
+                                onChange={(e) => setTime(e.target.value)}
+                            />
+                        </View>
+                    )}
 
                 </View>
 
